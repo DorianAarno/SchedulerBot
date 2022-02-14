@@ -52,6 +52,8 @@ class DropDownSchedule(ui.Select):
 
     async def callback(self, inter):
         await inter.response.defer()
+        if inter.author.id != self.ctx.author.id:
+            return await inter.send("You cannot interact with this menu.", ephemeral=True)
         for data in self.datas:
             if data[9] == int(self.values[0]):
                 if data[3] == 1:
@@ -75,7 +77,15 @@ class DropDownSchedule(ui.Select):
                             pass
                     if data[8] != "None":
                         embed.color = data[8]
-                    await inter.send(embed=embed)
+                    if self.command == 'remove':
+                        view = func.ConfirmationButtons(inter.author.id)
+                        await inter.send(content="Are you sure this is the schedule you want to delete?", embed=embed, view=view)
+                        await view.wait()
+                        if view.value:
+                            await func.DataUpdate(self.bot, f"DELETE FROM schedules WHERE guild_id = {inter.guild.id} and num = {self.values[0]}")
+                            await self.ctx.send(embed=func.SuccessEmbed('Schedule Removed!', 'Schedule was deleted successfully.'))
+                    else:
+                        await inter.send(embed=embed)
                 else:
                     message = data[2]
                     if data[7] != "None":
@@ -83,8 +93,13 @@ class DropDownSchedule(ui.Select):
                             message += f'\n\nAttachment: <{data[7]}>'
                         except:
                             pass
-                    await inter.send(message, allowed_mentions=AllowedMentions.none())
-
+                    if self.command == 'remove':
+                        view = func.ConfirmationButtons(inter.author.id)
+                        await inter.send(content="Are you sure this is the schedule you want to delete?\n\n"+message, allowed_mentions=AllowedMentions.none(), view=view)
+                        await view.wait()
+                        if view.value:
+                            await func.DataUpdate(self.bot, f"DELETE FROM schedules WHERE guild_id = {inter.guild.id} and num = {self.values[0]}")
+                            await self.ctx.send(embed=func.SuccessEmbed('Schedule Removed!', 'Schedule was deleted successfully.'))
 
 class DropdownView(ui.View):
     def __init__(self, bot, ctx, datas, command):
@@ -207,6 +222,11 @@ class SchedularCommands(Cog):
     async def overview(self, ctx):
         datas = await func.DataFetch(self.bot, 'all', 'schedules')
         await ctx.send("Here's a list of all schedules with their trigger time. Select any one of them to see their embed/message.", view=DropdownView(self.bot, ctx, datas, 'overview'))
+
+    @schedule.command()
+    async def remove(self, ctx):
+        datas = await func.DataFetch(self.bot, 'all', 'schedules')
+        await ctx.send("Here's a list of all schedules with their trigger time. Select any one of them to see their embed/message and delete them.", view=DropdownView(self.bot, ctx, datas, 'remove'))
 
 def setup(bot):
     bot.add_cog(SchedularCommands(bot))
