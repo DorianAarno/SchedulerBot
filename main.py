@@ -8,7 +8,7 @@ bot = commands.Bot(case_insensitive=True, command_prefix='.', intents=Intents.de
 async def on_ready():
     print('*********\nBot is Ready.\n*********')
 
-# bot.remove_command('help')
+bot.remove_command('help')
 
 @bot.command()
 async def ping(ctx):

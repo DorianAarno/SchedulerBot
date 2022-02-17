@@ -1,9 +1,10 @@
 from disnake import *
 from disnake.ext.commands import *
-from assests import functions as func
+from assets import functions as func
 import traceback
 from datetime import datetime, timedelta
 import asyncio
+from cogs.help import Help
 
 class DropDownSchedule(ui.Select):
     def __init__(self, bot, ctx, datas, command):
@@ -83,6 +84,8 @@ class DropDownSchedule(ui.Select):
                         await view.wait()
                         if view.value:
                             await func.DataUpdate(self.bot, f"DELETE FROM schedules WHERE guild_id = {inter.guild.id} and num = {self.values[0]}")
+                            for i, data in enumerate(self.datas):
+                                await func.DataUpdate(self.bot, f"UPDATE schedules SET num = {i+1} WHERE guild_id = {inter.guild.id} and num = {data[9]}")
                             await self.ctx.send(embed=func.SuccessEmbed('Schedule Removed!', 'Schedule was deleted successfully.'))
                     else:
                         await inter.send(embed=embed)
@@ -99,7 +102,11 @@ class DropDownSchedule(ui.Select):
                         await view.wait()
                         if view.value:
                             await func.DataUpdate(self.bot, f"DELETE FROM schedules WHERE guild_id = {inter.guild.id} and num = {self.values[0]}")
+                            for i, data in enumerate(self.datas):
+                                await func.DataUpdate(self.bot, f"UPDATE schedules SET num = {i+1} WHERE guild_id = {inter.guild.id} and num = {data[9]}")
                             await self.ctx.send(embed=func.SuccessEmbed('Schedule Removed!', 'Schedule was deleted successfully.'))
+                    else:
+                        await inter.send(message, allowed_mentions=AllowedMentions.none())
 
 class DropdownView(ui.View):
     def __init__(self, bot, ctx, datas, command):
@@ -118,11 +125,11 @@ class SchedularCommands(Cog):
 
     @group(invoke_without_command=True, case_insensitive=True)
     async def schedule(self, ctx):
-        pass
+        await Help.schedule(self, ctx)
 
     @schedule.group(invoke_without_command=True, case_insensitive=True)
     async def add(self, ctx):
-        pass
+        await Help.schedule(self, ctx)
 
     async def CheckDuration(self, ctx, duration):
         try:
@@ -149,7 +156,7 @@ class SchedularCommands(Cog):
         except:
             print(traceback.format_exc())
     @add.command()
-    async def message(self, ctx, duration, *, message):
+    async def message(self, ctx, channel: TextChannel, duration, *, message):
         try:
             time = await self.CheckDuration(ctx, duration)
             if time == "Exception 1":
@@ -165,13 +172,18 @@ class SchedularCommands(Cog):
             else:
                 attachment = msg.attachments[0].url
             datas = await func.DataFetch(self.bot, 'all', 'schedules')
-            await func.DataUpdate(self.bot, f"INSERT INTO schedules(guild_id, time, embed, response, title, footer, thumbnail, color, attachment, num) VALUES(?,?,?,?,?,?,?,?,?,?)", ctx.guild.id, time, 0, message, "None", "None", "None", "None", attachment, len(datas)+1)
+            await func.DataUpdate(self.bot, f"INSERT INTO schedules(guild_id, time, embed, response, title, footer, thumbnail, color, attachment, num, channel_id) VALUES(?,?,?,?,?,?,?,?,?,?,?)", ctx.guild.id, time, 0, message, "None", "None", "None", "None", attachment, len(datas)+1, channel.id)
             await ctx.send(embed=func.SuccessEmbed('Schedule Added!', "Schedule added successfully."))
         except:
             print(traceback.format_exc())
 
+    @message.error
+    async def message_Error(self, ctx, error):
+        if isinstance(error, (BadArgument, MissingRequiredArgument)):
+            await ctx.send(embed=func.ErrorEmbed('Syntax Error', 'Correct syntax is: `.schedule add message <#channel> <duration> <message>`. Example: `.schedule add message #general 10h Hello Everyone!`'))
+
     @add.command()
-    async def embed(self, ctx, duration, *, description):
+    async def embed(self, ctx, channel: TextChannel, duration, *, description):
         time = await self.CheckDuration(ctx, duration)
         if time == "Exception 1":
             return await ctx.send(embed=func.ErrorEmbed('Error', 'Time needs to be followed by either of the following. `w/d/h/m`'))
@@ -215,8 +227,13 @@ class SchedularCommands(Cog):
                 break
             current_element += 1
         datas = await func.DataFetch(self.bot, 'all', 'schedules')
-        await func.DataUpdate(self.bot, f"INSERT INTO schedules(guild_id, time, embed, response, title, footer, thumbnail, color, attachment, num) VALUES(?,?,?,?,?,?,?,?,?,?)", ctx.guild.id, time, 1, description, elements[0], elements[1], elements[2], elements[3], elements[4], len(datas)+1)
+        await func.DataUpdate(self.bot, f"INSERT INTO schedules(guild_id, time, embed, response, title, footer, thumbnail, color, attachment, num, channel_id) VALUES(?,?,?,?,?,?,?,?,?,?,?)", ctx.guild.id, time, 1, description, elements[0], elements[1], elements[2], elements[3], elements[4], len(datas)+1, channel.id)
         await ctx.send(embed=func.SuccessEmbed('Schedule Added!', "Schedule added successfully."))
+
+    @embed.error
+    async def embed_Error(self, ctx, error):
+        if isinstance(error, (BadArgument, MissingRequiredArgument)):
+            await ctx.send(embed=func.ErrorEmbed('Syntax Error', 'Correct syntax is: `.schedule add embed <#channel> <duration> <message>`. Example: `.schedule add embed #general 10h Hello Everyone!`'))
 
     @schedule.command()
     async def overview(self, ctx):

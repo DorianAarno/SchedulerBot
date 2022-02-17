@@ -3,7 +3,7 @@ from disnake.ext import commands
 import sqlite3
 import traceback
 
-db = sqlite3.connect('assests/data.sqlite')
+db = sqlite3.connect('assets/data.sqlite')
 cursor = db.cursor()
 
 async def DataFetch(bot, command, table, *vals):
@@ -33,7 +33,7 @@ async def DataUpdate(bot, query, *vals):
 
 def SuccessEmbed(title, description):
     return Embed(title=":ballot_box_with_check: "+title, description=description, color=Color.green())
-    
+
 def ErrorEmbed(title, description):
     return Embed(title=":x: "+title, description=description, color=Color.from_rgb(255,0,0))
 
