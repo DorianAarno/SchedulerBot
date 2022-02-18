@@ -4,6 +4,7 @@ from assets import functions as func
 import traceback
 from datetime import datetime
 import asyncio
+from cogs.scheduler_commands import SchedulerCommands
 
 async def ScheduleWatcher(self):
     await self.bot.wait_until_ready()
@@ -17,7 +18,7 @@ async def ScheduleWatcher(self):
                         channel = self.bot.get_channel(data[10])
                         if data[3] == 0:
                             if data[7] != "None":
-                                attachment = f"\n\nAttachments: {data[7]}"
+                                attachment = f"\n\n{data[7]}"
                             else:
                                 attachment = ""
                             await channel.send(data[2]+attachment)
@@ -43,10 +44,17 @@ async def ScheduleWatcher(self):
                             if data[8] != "None":
                                 embed.color = data[8]
                             await channel.send(embed=embed)
-                        await func.DataUpdate(self.bot, f"DELETE FROM schedules WHERE guild_id = {data[0]} and num = {data[9]}")
-                        guild_datas = await func.DataFetch(self.bot, 'all', 'schedules', data[0])
-                        for i, guild_data in enumerate(guild_datas):
-                            await func.DataUpdate(self.bot, f"UPDATE schedules SET num = {i+1} WHERE guild_id = {data[0]} and num = {guild_data[9]}")
+                        loop_integer = data[11]
+                        if loop_integer != 0:
+                            loop_integer -= 1
+                            if loop_integer <= 0:
+                                await func.DataUpdate(self.bot, f"DELETE FROM schedules WHERE guild_id = {data[0]} and num = {data[9]}")
+                                guild_datas = await func.DataFetch(self.bot, 'all', 'schedules', data[0])
+                                for i, guild_data in enumerate(guild_datas):
+                                    await func.DataUpdate(self.bot, f"UPDATE schedules SET num = {i+1} WHERE guild_id = {data[0]} and num = {guild_data[9]}")
+                                continue
+                        time = await SchedulerCommands.CheckDuration(self, data[12])
+                        await func.DataUpdate(self.bot, f"UPDATE schedules SET time = ?, loop_integer = ? WHERE guild_id = {data[0]} and num = {data[9]}", time, loop_integer)
                 except:
                     print(traceback.format_exc())
 

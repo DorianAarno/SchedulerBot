@@ -2,7 +2,7 @@ from disnake import *
 from disnake.ext import commands
 import os, traceback
 
-bot = commands.Bot(case_insensitive=True, command_prefix='.', intents=Intents.default())
+bot = commands.Bot(case_insensitive=True, command_prefix='*', intents=Intents.default())
 
 @bot.event
 async def on_ready():
