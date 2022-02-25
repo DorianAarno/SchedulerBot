@@ -24,5 +24,5 @@
 In [config.py](https://github.com/DorianAarno/MessageSchedularBot/blob/main/config.py) replace `TOKEN` with your application's token. 
 **That's it, you're ready to use the bot.**
  
-## 🔖 License
+## 📖 License
 Released under the [Apache License 2.0](https://github.com/DorianAarno/SchedulerBot/blob/main/LICENSE) license.
