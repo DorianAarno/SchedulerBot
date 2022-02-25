@@ -4,7 +4,7 @@
   <br>
 </h1>
 <p align="center">A bot to assist you with scheduling messages. Supports loop functionality, embed customization, etc.</p>
-<h4 align="center"> 💖 Special Thanks to <a href="https://sneakernews.com/">Sneaker News</a> for commissioning this bot.</h4>
+<h4 align="center"> Special Thanks to <a href="https://sneakernews.com/">Sneaker News</a> for commissioning this bot.</h4>
 
 ## ❗ Features
 * ➿ Loop schedules 
