@@ -25,4 +25,4 @@ In [config.py](https://github.com/DorianAarno/MessageSchedularBot/blob/main/conf
 **That's it, you're ready to use the bot.**
  
 ## 🔖 License
-Released under the MIT license.
+Released under the Apache License 2.0 license.
