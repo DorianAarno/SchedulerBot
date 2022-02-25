@@ -13,11 +13,12 @@
 * 👍 Easy functionality
 * ♾️ Set unlimited schedules 
 * 🔒 Usable by server administrators only
+* 🤖 Supports prefix commands only
 * 💬 Supports choice between a normal message and an embed
 * 🆗 Confirm your schedule with overview command
 * ✏️ Edit your schedule
-* 🤖 Supports prefix commands only
 * 🗑️ Remove your schedule
+
 
 ## ❓ How to use it?
 In [config.py](https://github.com/DorianAarno/MessageSchedularBot/blob/main/config.py) replace `TOKEN` with your application's token. 
