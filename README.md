@@ -1,6 +1,6 @@
 <h1 align="center">
   <br>
-   ⏲️ Message Schedular Bot ⏲️
+   ⏲️ Message Scheduler Bot ⏲️
   <br>
 </h1>
 <p align="center">A bot to assist you with scheduling messages. Supports loop functionality, embed customization, etc.</p>
