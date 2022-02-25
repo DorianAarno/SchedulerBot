@@ -2,8 +2,9 @@ from disnake import *
 from disnake.ext import commands
 import os, traceback
 from assets import functions as func
+from config import Token
 
-bot = commands.Bot(case_insensitive=True, command_prefix='*', intents=Intents.default())
+bot = commands.Bot(case_insensitive=True, command_prefix='.', intents=Intents.default())
 
 @bot.event
 async def on_ready():
@@ -37,4 +38,4 @@ for file in os.listdir('./cogs'):
             print(f"Unable to load {file[:-3]}.")
             print(traceback.format_exc())
 
-bot.run('ODYwNDAxMDg2Mjc1MTI1MjQ4.YN6s9A.em6BE1C34Gu23qpAY18Fo2VBHMQ')
+bot.run(Token)

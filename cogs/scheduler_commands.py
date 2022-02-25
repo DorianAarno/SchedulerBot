@@ -16,35 +16,36 @@ class DropDownSchedule(ui.Select):
         options = []
         for data in datas:
             time = datetime.strptime(data[1], '%Y-%m-%d %H:%M:%S.%f')
-            diff = time - datetime.utcnow()
+            time_now = datetime.utcnow()
+            diff = time - time_now
             second_diff = diff.seconds
             day_diff = diff.days
-            if day_diff < 0:
+            if time < time_now:
                 time = 'Time has passed.'
-
-            if day_diff == 0:
-                if second_diff < 10:
-                    time = "Now"
-                elif second_diff < 60:
-                    time = "In "+str(second_diff) + " seconds"
-                elif second_diff < 120:
-                    time = "in a minute"
-                elif second_diff < 3600:
-                    time = "In "+str(second_diff // 60) + " minutes"
-                elif second_diff < 7200:
-                    time = "in an hour"
-                elif second_diff < 86400:
-                    time = "In "+str(second_diff // 3600) + " hours"
-            elif day_diff == 1:
-                time = "Tommorow"
-            elif day_diff < 7:
-                time = "In "+str(day_diff) + " days"
-            elif day_diff < 31:
-                time = "In "+str(day_diff // 7) + " weeks"
-            elif day_diff < 365:
-                time = "In "+str(day_diff // 30) + " months"
             else:
-                time = "In "+str(day_diff // 365) + " years"
+                if day_diff == 0:
+                    if second_diff < 10:
+                        time = "Now"
+                    elif second_diff < 60:
+                        time = "In "+str(second_diff) + " seconds"
+                    elif second_diff < 120:
+                        time = "in a minute"
+                    elif second_diff < 3600:
+                        time = "In "+str(second_diff // 60) + " minutes"
+                    elif second_diff < 7200:
+                        time = "in an hour"
+                    elif second_diff < 86400:
+                        time = "In "+str(second_diff // 3600) + " hours"
+                elif day_diff == 1:
+                    time = "Tommorow"
+                elif day_diff < 7:
+                    time = "In "+str(day_diff) + " days"
+                elif day_diff < 31:
+                    time = "In "+str(day_diff // 7) + " weeks"
+                elif day_diff < 365:
+                    time = "In "+str(day_diff // 30) + " months"
+                else:
+                    time = "In "+str(day_diff // 365) + " years"
             options.append(SelectOption(label=time, value=data[9]))
         super().__init__(
             max_values = 1,
@@ -70,6 +71,9 @@ class DropDownSchedule(ui.Select):
             else:
                 embed = 1
             await func.DataUpdate(self.bot, f"DELETE FROM schedules WHERE guild_id = {inter.guild.id} and num = {self.values[0]}")
+            for data in reversed(self.datas):
+                if data[9] == int(self.values[0]):
+                    self.datas.remove(data)
             for i, data in enumerate(self.datas):
                 await func.DataUpdate(self.bot, f"UPDATE schedules SET num = {i+1} WHERE guild_id = {inter.guild.id} and num = {data[9]}")
             await SchedulerCommands.ScheduleAdd(self, self.ctx, channel, data[1], content, embed, 'edit')
@@ -104,6 +108,9 @@ class DropDownSchedule(ui.Select):
                         await view.wait()
                         if view.value:
                             await func.DataUpdate(self.bot, f"DELETE FROM schedules WHERE guild_id = {inter.guild.id} and num = {self.values[0]}")
+                            for data in reversed(self.datas):
+                                if data[9] == int(self.values[0]):
+                                    self.datas.remove(data)
                             for i, data in enumerate(self.datas):
                                 await func.DataUpdate(self.bot, f"UPDATE schedules SET num = {i+1} WHERE guild_id = {inter.guild.id} and num = {data[9]}")
                             await self.ctx.send(embed=func.SuccessEmbed('Schedule Removed!', 'Schedule was deleted successfully.'))
@@ -129,6 +136,9 @@ class DropDownSchedule(ui.Select):
                         await view.wait()
                         if view.value:
                             await func.DataUpdate(self.bot, f"DELETE FROM schedules WHERE guild_id = {inter.guild.id} and num = {self.values[0]}")
+                            for data in reversed(self.datas):
+                                if data[9] == int(self.values[0]):
+                                    self.datas.remove(data)
                             for i, data in enumerate(self.datas):
                                 await func.DataUpdate(self.bot, f"UPDATE schedules SET num = {i+1} WHERE guild_id = {inter.guild.id} and num = {data[9]}")
                             await self.ctx.send(embed=func.SuccessEmbed('Schedule Removed!', 'Schedule was deleted successfully.'))
@@ -280,10 +290,13 @@ class SchedulerCommands(Cog):
 
     @schedule.command()
     async def overview(self, ctx):
-        datas = await func.DataFetch(self.bot, 'all', 'schedules', ctx.guild.id)
-        if len(datas) == 0:
-            return await ctx.send(embed=func.ErrorEmbed('Error', 'There are no active schedules.'))
-        await ctx.send(embed=Embed(title="Select a Schedule", description="Here's a list of all schedules with their trigger time. Select any one of them to see their embed/message."), view=DropdownView(self.bot, ctx, datas, 'overview'))
+        try:
+            datas = await func.DataFetch(self.bot, 'all', 'schedules', ctx.guild.id)
+            if len(datas) == 0:
+                return await ctx.send(embed=func.ErrorEmbed('Error', 'There are no active schedules.'))
+            await ctx.send(embed=Embed(title="Select a Schedule", description="Here's a list of all schedules with their trigger time. Select any one of them to see their embed/message."), view=DropdownView(self.bot, ctx, datas, 'overview'))
+        except:
+            print(traceback.format_exc())
 
     @schedule.command()
     async def remove(self, ctx):
@@ -304,7 +317,7 @@ class SchedulerCommands(Cog):
     @message_edit.error
     async def message_edit_Error(self, ctx, error):
         if isinstance(error, (BadArgument, MissingRequiredArgument)):
-            await ctx.send(embed=func.ErrorEmbed('Syntax Error', 'Correct syntax is: `*schedule edit message <#channel/`None`> <content>`.'))
+            await ctx.send(embed=func.ErrorEmbed('Syntax Error', 'Correct syntax is: `*schedule edit message <#channel> <content>`.'))
 
     @edit.command(name='embed')
     async def embed_edit(self, ctx, channel:TextChannel = "None", * , description):
@@ -316,7 +329,7 @@ class SchedulerCommands(Cog):
     @embed_edit.error
     async def embed_edit_Error(self, ctx, error):
         if isinstance(error, (BadArgument, MissingRequiredArgument)):
-            await ctx.send(embed=func.ErrorEmbed('Syntax Error', 'Correct syntax is: `*schedule edit embed <#channel/`None`> <description>`.'))
+            await ctx.send(embed=func.ErrorEmbed('Syntax Error', 'Correct syntax is: `*schedule edit embed <#channel> <description>`.'))
 
 def setup(bot):
     bot.add_cog(SchedulerCommands(bot))
