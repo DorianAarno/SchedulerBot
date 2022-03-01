@@ -3,7 +3,7 @@
    ⏲️ Message Scheduler Bot ⏲️
   <br>
 </h1>
-<p align="center">A bot to assist you with scheduling messages. Supports loop functionality, embed customization, etc.</p>
+<p align="center">A discord bot to assist you with scheduling messages. Supports loop functionality, embed customization, etc.</p>
 <h4 align="center"> Special Thanks to <a href="https://sneakernews.com/", target="_blank">Sneaker News</a> and <a href="https://twitter.com/elitejakey", target="_blank">Jakey</a> for commissioning this bot.</h4>
 
 ## ❗ Features
